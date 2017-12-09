@@ -188,15 +188,16 @@ int main(int argc, char *argv[]) {
 
     if (argc != 5) {
         cerr << "Wrong inputs!";
-        cerr << endl << "Inputs: Level m attrLength conjSize" << endl;
+        cerr << endl << "Inputs: level m attrLength conjSize" << endl;
+        return 1;
     }
     long p = 2;
     long r = 1;
     // long m = 31775; 32767
     // long L = 29; 31
 
-    long m = atoi(argv[1]);
-    long L = atoi(argv[2]);
+    long m = atoi(argv[2]);
+    long L = atoi(argv[1]);
 //    double heuristicSecurity = (3 * eulerTot(m) * 7.2) / ((L + 1) * 22 * 4) - 110;
 
     // Define wildcard charaters
@@ -236,8 +237,6 @@ int main(int argc, char *argv[]) {
     IndexSet allPrimes(0, context.numPrimes() - 1);
     clog << m << ", " << L << ", " << context.logOfProduct(allPrimes) / log(2.0) << ", " << p << ", " << plaintextDegree
          << ", " << numSlots << ", ";
-
-    clog << 
 
     // Process the strings, one attribute and one query pattern of type %W%,
     // $ wildcard is encoded as ASCII code 2
