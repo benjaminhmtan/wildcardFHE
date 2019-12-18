@@ -12,6 +12,8 @@
 #include "helib/FHE.h"
 #include "helib/EncryptedArray.h"
 
+// ! Note: HElib pre 1.0.0 uses findBaseLevel and HElib 1.0.0 uses capacity
+
 #define new_simd 0
 
 NTL::ZZX long2Poly(long query) {
@@ -111,7 +113,7 @@ void treeMult(Ctxt &resultCtxt, const std::vector<Ctxt> &ctxtVec) {
         nextLayer.clear();
         treeMultHelper(resultCtxt, currentLayer, nextLayer);
     } else {
-//        // std::cout << "Only 1 Ciphertext; No Multiplication Done." << std::endl;
+//        std::cout << "Only 1 Ciphertext; No Multiplication Done." << std::endl;
         resultCtxt = ctxtVec[0];
     }
 }
@@ -142,7 +144,7 @@ void oneTotalProduct(Ctxt &resultCtxt, const Ctxt &dataCtxt, const long wordLeng
         shiftAmt = 2 * shiftAmt;
         // endTime = std::chrono::high_resolution_clock::now();
         // timeTaken = endTime-startTime;
-        // // std::cout << shiftAmt << ", Time Taken: " << timeTaken.count() << std::endl;
+        // std::cout << shiftAmt << ", Time Taken: " << timeTaken.count() << std::endl;
     }
 }
 
@@ -246,7 +248,7 @@ int main(int argc, char *argv[]) {
     // # wildcard is encoded as ASCII code 3
 
     std::string attrString = "spares";
-    // std::cout << std::endl << "Attribute String: " << attrString << std::endl;
+    std::cout << std::endl << "Attribute String: " << attrString << std::endl;
 
     std::vector<NTL::ZZX> plaintextAttr;
 #if new_simd
@@ -272,7 +274,7 @@ int main(int argc, char *argv[]) {
     queryString += "c";
     queryString += "e";
     queryLength = queryString.length();
-    // std::cout << "Query Pattern: " << queryString << std::endl;
+    std::cout << "Query Pattern: " << queryString << std::endl;
 
     std::vector<NTL::ZZX> plaintextQuery, plaintextE;
     std::vector<NTL::ZZX> plaintextConjunction((unsigned long) numSlots, long2Poly(rand() % (1L << 7)));
@@ -296,7 +298,7 @@ int main(int argc, char *argv[]) {
             plaintextQuery[counter] = char2Poly(queryString[i]);
             counter++;
         }
-        // // std::cout << i << ", " << counter << std::endl;
+        // std::cout << i << ", " << counter << std::endl;
     }
     for (unsigned long i = counter; i < wordLength; i++) {
         plaintextQuery.resize((i+1)*numWords, char2Poly(wcChar));
@@ -338,34 +340,34 @@ int main(int argc, char *argv[]) {
     plaintextResult.resize(numSlots, NTL::ZZX(0));
 
     // for (unsigned long i = 0; i < plaintextAttr.size(); i++) {
-    //     // std::cout << poly2Char(plaintextAttr[i]) << ", ";
+    //     std::cout << poly2Char(plaintextAttr[i]) << ", ";
     // }
-    // // std::cout << std::endl;
+    // std::cout << std::endl;
     // for (unsigned long i = 0; i < plaintextQuery.size(); i++) {
-    //     // std::cout << poly2Char(plaintextQuery[i]) << ", ";
+    //     std::cout << poly2Char(plaintextQuery[i]) << ", ";
     // }
-    // // std::cout << std::endl;
+    // std::cout << std::endl;
     // for (unsigned long i = 0; i < plaintextE.size(); i++) {
-    //     // std::cout << plaintextE[i] << ", ";
+    //     std::cout << plaintextE[i] << ", ";
     // }
-    // // std::cout << std::endl;
+    // std::cout << std::endl;
 
     // for(unsigned long i = wordLength; i < 2*wordLength; i++) {
-    //     // std::cout << poly2Char(plaintextAttr[i]) << ", ";
+    //     std::cout << poly2Char(plaintextAttr[i]) << ", ";
     // }
-    // // std::cout << std::endl;
+    // std::cout << std::endl;
     // for(unsigned long i = wordLength; i < 2*wordLength; i++) {
-    //     // std::cout << poly2Char(plaintextQuery[i]) << ", ";
+    //     std::cout << poly2Char(plaintextQuery[i]) << ", ";
     // }
-    // // std::cout << std::endl;
+    // std::cout << std::endl;
     // for(unsigned long i = wordLength; i < 2*wordLength; i++) {
-    //     // std::cout << plaintextE[i] << ", ";
+    //     std::cout << plaintextE[i] << ", ";
     // }
-    // // std::cout << std::endl;
+    // std::cout << std::endl;
 
     std::clog << wordLength << ", " << queryLength << ", " << numWords << ", ";
 
-    // std::cout << "Plaintext Processing Done!" << std::endl;
+    std::cout << "Plaintext Processing Done!" << std::endl;
 
     // Initialize and encrypt ciphertexts
     Ctxt ciphertextAttr(publicKey);
@@ -408,33 +410,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    Ctxt test(publicKey), test1(publicKey);
-    test = oneCiphertext;
-    test1 = oneCiphertext;
-
-    // std::cout << std::endl;
-    startTime = std::chrono::high_resolution_clock::now();
-    fastPower(test, plaintextDegree);
-    endTime = std::chrono::high_resolution_clock::now();
-    timeTaken = endTime - startTime;
-    // std::cout << timeTaken.count() << ", ";
-
-    startTime = std::chrono::high_resolution_clock::now();
-    oneTotalProduct(test1, test, wordLength, ea);
-    endTime = std::chrono::high_resolution_clock::now();
-    timeTaken = endTime - startTime;
-    // std::cout << timeTaken.count() << ", ";
-    // std::cout << std::endl;
-
-    // For compound conjunction queries
-    std::vector<Ctxt> ciphertextConj;
-    std::vector<Ctxt> ciphertextConjResult;
-    for (unsigned long i = 0; i < conjSize; i++) {
-        ciphertextConj.push_back(ciphertextAttr);
-        ciphertextConjResult.push_back(ciphertextAttr);
-    }
-
-    // std::cout << "Encryption Done!" << std::endl;
+    std::cout << "Encryption Done!" << std::endl;
 
     NTL::ZZX selectPoly;
     NTL::ZZX queryMask, finalMask;
@@ -453,7 +429,7 @@ int main(int argc, char *argv[]) {
     //     endTime = std::chrono::high_resolution_clock::now();
     //     timeTaken = endTime-startTime;
     //     totalTime += timeTaken.count();
-    //     // std::cout << "Pre-compute Time: " << timeTaken.count() << std::endl;
+    //     std::cout << "Pre-compute Time: " << timeTaken.count() << std::endl;
 
     startTime = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for
@@ -467,14 +443,14 @@ int main(int argc, char *argv[]) {
     endTime = std::chrono::high_resolution_clock::now();
     timeTaken = endTime - startTime;
     // totalTime += timeTaken.count();
-    // std::cout << "Pre-compute Time: " << timeTaken.count() << std::endl;
+    std::cout << "Pre-compute Time: " << timeTaken.count() << std::endl;
     std::clog << timeTaken.count() << ", ";
 
     // for(unsigned long i = 0; i < ciphertextWs.size(); i++) {
     //         ea.decrypt(ciphertextWs[i],secretKey,plaintextResult);
-    //         // std::cout << poly2Char(plaintextResult[0]) << ", ";
+    //         std::cout << poly2Char(plaintextResult[0]) << ", ";
     // }
-    // // std::cout << std::endl;
+    // std::cout << std::endl;
 
     // Step 2: Test if the characters are the same
     startTime = std::chrono::high_resolution_clock::now();
@@ -489,7 +465,7 @@ int main(int argc, char *argv[]) {
     endTime = std::chrono::high_resolution_clock::now();
     timeTaken = endTime - startTime;
     totalTime += timeTaken.count();
-    // std::cout << "XOR Time: " << timeTaken.count() << std::endl;
+    std::cout << "XOR Time: " << timeTaken.count() << std::endl;
 
     startTime = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for
@@ -509,7 +485,7 @@ int main(int argc, char *argv[]) {
     endTime = std::chrono::high_resolution_clock::now();
     timeTaken = endTime - startTime;
     totalTime += timeTaken.count();
-    // std::cout << "Level left: " << ciphertextRs[1].capacity() << ", Equality Check + eMask Time: " << timeTaken.count() << std::endl;
+    std::cout << "Level left: " << ciphertextRs[1].capacity() << ", Equality Check + eMask Time: " << timeTaken.count() << std::endl;
     std::clog << timeTaken.count() << ", ";
 
     // Step 3: Combine results of character tests per shift
@@ -526,7 +502,7 @@ int main(int argc, char *argv[]) {
     endTime = std::chrono::high_resolution_clock::now();
     timeTaken = endTime - startTime;
     totalTime += timeTaken.count();
-    // std::cout << "Level left: " << ciphertextSs[1].capacity() << ", Product of Equalities: " << timeTaken.count() << std::endl;
+    std::cout << "Level left: " << ciphertextSs[1].capacity() << ", Product of Equalities: " << timeTaken.count() << std::endl;
     std::clog << timeTaken.count() << ", ";
 
     // Step 4: Combine results from testing every possible shift
@@ -539,7 +515,7 @@ int main(int argc, char *argv[]) {
     endTime = std::chrono::high_resolution_clock::now();
     timeTaken = endTime - startTime;
     totalTime += timeTaken.count();
-    // std::cout << "Level left: " << ciphertextSs[1].capacity() << ", Disjunction Prep Time: " << timeTaken.count() << std::endl;
+    std::cout << "Level left: " << ciphertextSs[1].capacity() << ", Disjunction Prep Time: " << timeTaken.count() << std::endl;
     std::clog << timeTaken.count() << ", ";
 
     startTime = std::chrono::high_resolution_clock::now();
@@ -554,7 +530,7 @@ int main(int argc, char *argv[]) {
     endTime = std::chrono::high_resolution_clock::now();
     timeTaken = endTime - startTime;
     totalTime += timeTaken.count();
-    // std::cout << "Level left: " << ciphertextResult.capacity() << ", Disjunction Time: " << timeTaken.count() << std::endl;
+    std::cout << "Level left: " << ciphertextResult.capacity() << ", Disjunction Time: " << timeTaken.count() << std::endl;
     std::clog << timeTaken.count() << ", ";
 
     std::clog << totalTime << ", ";
@@ -573,56 +549,56 @@ int main(int argc, char *argv[]) {
     endTime = std::chrono::high_resolution_clock::now();
     timeTaken = endTime - startTime;
     // totalTime += timeTaken.count();
-    // std::cout << "Level left: " << tempCiphertext.capacity() << ", Fill + Selection Time: " << timeTaken.count() << std::endl;
+    std::cout << "Level left: " << tempCiphertext.capacity() << ", Fill + Selection Time: " << timeTaken.count() << std::endl;
     std::clog << timeTaken.count() << ", ";
 
-    // std::cout << "Total Time: " << totalTime << std::endl;
+    std::cout << "Total Time: " << totalTime << std::endl;
 
     ea.decrypt(ciphertextResult, secretKey, plaintextResult);
     for (unsigned long i = 0; i < wordLength; i++) {
-        // std::cout << poly2Long(plaintextResult[i]) << ", ";
+        std::cout << poly2Long(plaintextResult[i]) << ", ";
     }
-    // std::cout << std::endl;
+    std::cout << std::endl;
 
     ea.decrypt(tempCiphertext, secretKey, plaintextResult);
     for (unsigned long i = 0; i < wordLength; i++) {
-        // std::cout << poly2Char(plaintextResult[i]) << ", ";
+        std::cout << poly2Char(plaintextResult[i]) << ", ";
     }
-    // std::cout << std::endl;
+    std::cout << std::endl;
 
     std::clog << poly2Char(plaintextResult[0]) << ", ";
 
 //    ea.decrypt(ciphertextSs[0], secretKey, plaintextResult);
 //    for (unsigned long i = 0; i < wordLength; i++) {
-//        // std::cout << poly2Long(plaintextResult[i]) << ", ";
+//        std::cout << poly2Long(plaintextResult[i]) << ", ";
 //    }
-//    // std::cout << std::endl;
+//    std::cout << std::endl;
 //
 //    ea.decrypt(ciphertextRs[0], secretKey, plaintextResult);
 //    for (unsigned long i = 0; i < wordLength; i++) {
-//        // std::cout << poly2Long(plaintextResult[i]) << ", ";
+//        std::cout << poly2Long(plaintextResult[i]) << ", ";
 //    }
-//    // std::cout << std::endl;
+//    std::cout << std::endl;
 //
 //    ea.decrypt(ciphertextWs[0], secretKey, plaintextResult);
 //    for (unsigned long i = 0; i < wordLength; i++) {
-//        // std::cout << poly2Long(plaintextResult[i]) << ", ";
+//        std::cout << poly2Long(plaintextResult[i]) << ", ";
 //    }
-//    // std::cout << std::endl;
+//    std::cout << std::endl;
 
 //        ea.decrypt(conjResult, secretKey, plaintextResult);
 //        for(unsigned long i = 0; i < wordLength; i++) {
-//            // std::cout << poly2Long(plaintextResult[i]) << ", ";
+//            std::cout << poly2Long(plaintextResult[i]) << ", ";
 //        }
-//        // std::cout << std::endl;
+//        std::cout << std::endl;
 
 //        for(unsigned long i = 0; i < conjSize; i++) {
 //            ea.decrypt(ciphertextConj[i],secretKey, plaintextResult);
 //            for(unsigned long i = 0; i < wordLength; i++) {
-//                // std::cout << poly2Long(plaintextResult[i]) << ", ";
+//                std::cout << poly2Long(plaintextResult[i]) << ", ";
 //            }
-//            // std::cout << std::endl;
+//            std::cout << std::endl;
 //        }
-//        // std::cout << std::endl;
+//        std::cout << std::endl;
     std::clog << std::endl;
 }
