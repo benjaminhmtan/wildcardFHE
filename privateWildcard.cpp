@@ -410,6 +410,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // For compound conjunction queries
+    std::vector<Ctxt> ciphertextConj;
+    std::vector<Ctxt> ciphertextConjResult;
+    for (unsigned long i = 0; i < conjSize; i++) {
+        ciphertextConj.push_back(ciphertextAttr);
+        ciphertextConjResult.push_back(ciphertextAttr);
+    }
+
     std::cout << "Encryption Done!" << std::endl;
 
     NTL::ZZX selectPoly;
